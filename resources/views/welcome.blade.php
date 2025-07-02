@@ -41,6 +41,8 @@
         <h1>Welcome to AI Chatbot</h1>
         <a href="/gemini-chat"><button class="chat-btn">Gemini Chat</button></a>
         <a href="/openai-chat"><button class="chat-btn">OpenAI Chat</button></a>
+        <a href="/reminder"><button class="chat-btn">Reminder</button></a>
+        <a href="/rag"><button class="chat-btn">RAG System</button></a>
     </div>
 </body>
 </html>

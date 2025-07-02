@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Http;
 class OpenAI
 {
     protected $apiKey;
-    protected $textEndpoint = 'https://api.openai.com/v1/chat/completions';
+    protected $textEndpoint = 'https://openrouter.ai/api/v1/chat/completions';
     protected $imageEndpoint = 'https://api.openai.com/v1/images/generations';
 
     public function __construct()
@@ -15,7 +15,7 @@ class OpenAI
         $this->apiKey = config('services.openai.api_key');
     }
 
-    public function chat($message, $type = 'o1-mini')
+    public function chat($message, $type = 'openai/gpt-4o')
     {
         if ($type === 'dall-e-2') {
             // Image generation
@@ -41,15 +41,19 @@ class OpenAI
                 'details' => $details,
             ];
         } else {
-            // Text generation (o1-mini or similar)
+            // Text generation (openai/gpt-4o or similar)
             $payload = [
-                'model' => 'o1-mini',
+                'model' => $type,
                 'messages' => [
                     ['role' => 'user', 'content' => $message]
-                ]
+                ],
+                'max_tokens' => 1000,
             ];
-            $response = Http::withToken($this->apiKey)
-                ->post($this->textEndpoint, $payload);
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'HTTP-Referer' => url('/'), // Optional: for OpenRouter analytics
+                'X-Title' => 'Laravel AI Reminder Agent', // Optional: for OpenRouter analytics
+            ])->post($this->textEndpoint, $payload);
             if ($response->successful() && isset($response['choices'][0]['message']['content'])) {
                 return ['text' => $response['choices'][0]['message']['content']];
             }
@@ -60,7 +64,7 @@ class OpenAI
                 $details = $response->body();
             }
             return [
-                'error' => 'Failed to get response from OpenAI',
+                'error' => 'Failed to get response from OpenRouter',
                 'status' => $response->status(),
                 'details' => $details,
             ];
